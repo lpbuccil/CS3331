@@ -1,0 +1,81 @@
+1.
+    Main.c - Creates shared memory and stores the input array into it. Then 
+            main forks and execvp with the shmID information about the left
+            and right indexes of the left and right array in the shared
+            meory. Main then waits for the child process to die and 
+            then prints out the sorted array.
+    Merge.c - Takes the shmID and attaches the memory, then it creates and left
+            and right array and loads them with the elements in the shared
+            memory. If the left and right array both have one element, then
+            it sorts them then terminates, if not, it splits the left into a 
+            left and right and vise-versa with the right array. With these
+            new array, we fork and execvp with the left side of the original
+            array and the right side of the original array calling the Merge
+            file again. After the forks, we wait for the two child processes
+            to die, when they die, we know that the left and right arrays are
+            sorted and need to be merged into one array again. We call the 
+            merge function which takes the two arrays and forks for every
+            element, these forks will find the placement of the element
+            in the output array and then store them there and then terminate.
+            After all of the forks in the merge function is called, the 
+            function waits for all of the child processes to terminate.
+            When they all terminate, the merge function copies the sorted
+            output back into the original shared memory. In the main function
+            we know that when all of the children die, the array is sorted,
+            and it terminates itself.
+
+2. 
+    My program works because sorting is done independently of sorts taking
+    place at the same level of recursion. Therefor, we can concurrently
+    sort each side and then wait for each sides to be sorted before we 
+    merge them back together. 
+
+3. 
+    Main.c - We create a shared memeory to store our elements in for the 
+            merge.c to access. When merge.c is done, we read the sorted
+            output and print it out.
+    Merge.c - For each call of merge.c, we attach the shared memory created by
+              main.c to read and store the input/output. Inside of the merge
+              function, we create shared memory for the output of each 
+              forks of each element, this is used so we can store the
+              output without changing the values of the left and right array.
+    
+4. 
+    There are no race conditions because we never store the changed value 
+    back into the array we are reading from until all child processes are
+    finished reading from it. We also dont read from the output until all
+    child processes are done writing to it. Therefor, we never have multiple 
+    processes reading and writing from the same array concurrently.
+
+    The program specifications say specifically to use a temp array to store
+    the outputs for the binary search to prevent a race condition here.
+    The specifications also says to wait for the children to terminate
+    before continuing its binary search part, therefore there are no
+    race conditions in the specifications.
+
+5. 
+    You should not save the assigned array entry back to the given array
+    because this will create a race condition and will overwrite elements
+    that may have not been processed yet. The output array is made 
+    specifically so the output and the input are seperated because the 
+    output depends on the order of the input arrays. If elements are
+    stored back into the input arrays, this will change the order in which
+    the elements are stored.
+
+6.
+    At the beginning of our merge function, we create shared memory with a 
+    size of leftSize + rightSize. This is to store the output of our elements.
+    At the end of out function, we copy the values of the shared output array
+    back into our original shared input array.
+
+7. 
+    If we create all of the processes at the beginning of the merge phase, we
+    can the have a flag in shared memory to tell the process to wait.
+    During the wait period, we can manupliate the output array and the left
+    and right array that the binary search will search through. This way, 
+    we can keep our processes alive, but "suspend" then until they need to 
+    be used. After the processes are no longer suspended, they can go through
+    the search process and store all their elements in the output array. After
+    they can set another flag in shared memory saying that they have completed.
+    The calling function can then wait until all of the children process have
+    said they finished and then continue on.

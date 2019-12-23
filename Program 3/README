@@ -1,0 +1,67 @@
+1.
+	No, we join the main thread to the child threads after we create n threads
+	for the current row. This prevents a race condition as the threads that
+	compute the results needed by other threads are guaranteed to be finished.
+	The main thread only reads from the output array after all child threads
+	have completed.
+
+2.
+	Proof by induction.
+
+	Base step: 
+	i = 1(number of elements), prefix sum of i is the vlaue of 
+	the only element. The program computes log2(i) + 1 to calculate the 
+	number of runs the will have to happen. In this case 
+	log2(1) = 0 + 1 = 1. Since the program only creates threads if the
+	value of log2(i) + 1 > 1. The output will simply be the input.
+	Thus the prefix sum of 1 element is the value of the element itself.
+
+	Inductive step:
+	Assume i - 1 calculates the prefix sum. Then log2(i - 1) + 1 number of
+	runs will occur. Then i elements will have a total runs of
+	log2(i-1) + 1 + log2(1) + 1 = log2(i-1) + 2. 
+	(log2(i-1) + 2) - (log2(i-1) + 1) = 1. We have shown that i = 1 computes
+	the prefix sum, and i-1 (by assumption) computes the prefix sum. Then
+	output[i] = a[i - 1] + a[i]. Proving that i elements calculates the
+	prefix sum.
+
+3.
+	 No, say we have 4 elements 1, 2, 3, 4
+	 The way our program calulates the values is to save the output in a temp
+	 array. Shown:
+
+	 1  2  3  4 run 1
+	 |\ |\ |\ |
+	 1  3  5  7 run 2
+	 | \| \|  |
+	 |  |\ |\ |
+     1  3  6  10
+     
+     If we save the values back into the input array, we get
+
+     1  2  3  4 run 1
+	 |\ |\ |\ |
+	 1  3  5  7 
+
+	 1  3  5  7 run 2
+	 | \| \|  |
+	 |  |\ |\ |
+     1  3  6  10
+
+     But there is no guarant for all threads of the run to complete in a
+     sequential order, so we could have:
+
+     1  2  3  4 run 1 a[1] is calculated
+	   \|
+	    3
+	 1  3  3  4 run 1 a[2] is calculated
+	      \|
+	       6
+	This would provide an incorrect result.
+
+4. 
+	Yes, you could create n threads during run 1. Then have them compute their
+	respected value then set a flag to 1 in a array done[n] to say it is done.
+	The thread would then wait in a while loop for the flag to be 0. Main
+	would wait for all the flags to be 1, then set the flags back to 0, telling
+	all the threads to compute the next value.

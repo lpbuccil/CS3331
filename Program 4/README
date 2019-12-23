@@ -1,0 +1,69 @@
+1.
+    I have a semaphore at the beginning of the AskQuestion function, it only
+    allows 3 elves in. After an elf enters, it increments a counter. When an 
+    elf exits, it decrements the counter. When the last elf leaves, it
+    signals for the next three elves to enter.
+
+2.
+    I created two semaphores to assure this, ElfHasQuesiton for when the
+    question needs to be answered. Each elf will wait here until santa
+    answers their specific question. When santa answeres he will signal
+    ElfHasQuestion to allow the elf to continue. Right after, I have
+    another semaphore ElfsQuestionAnswered that the elves have to wait on.
+    Santa only signals ElfsQuestionAnswered after all the questions have
+    been answered. This prevents elves from leaving until all questions
+    have been answered.
+
+3.
+    For each elf that has a question, they call AskQuestion. The first thing
+    they elf does is call Elf->Wait, the Elf semaphore is initalized to 3. 
+    This means that only three elfs at a time can enter to ask santa a 
+    question. After three elves enter, it prevents any others from 
+    entering until the other three have left.
+    This assures that any elf not currently waiting for their question
+    to be answered or waiting to leave can enter to ask a question. This
+    prevents elves from cutting.
+
+4.
+    I have a counter called elfCounter, this keeps track of the number
+    of elves waiting to have their questions answered. When the last
+    elf enters to have its question answered (3 elves) it will see that
+    the counter equals three and wakes up santa. Santa is blocked on
+    Sleeping->Wait if he wakes up, then this means 2 things. The 
+    Reindeer are ready or the elves have questions. If the reindeer
+    are not ready, then he answers the questions. Because Santa is
+    blocked on the Sleeping->wait he cannot answer questions unless 
+    Sleeping->signal is called.
+
+5.
+    I have a reinderCounter that is protected by a mutex. When a reindeer
+    comes back, it increments this counter. After incrementing, the 
+    reindeer will check to see if the counter equals the total number of
+    reindder. If it does, then all reindeer are back and it is the last one.
+    The reindeer with then wake up santa. 
+
+6.
+    When santa wake up, this is because the reindeer woke him up and/or
+    the elves have questions. The first thing santa does is to see if all
+    reindeer have came back from vacation. If so, then this means the reindeer
+    woke him up. Otherwise if all reindeer anr not back, then the elves asked
+    a question.
+
+7.
+    When the sleigh it ready, all reindeer call flyoff. This tells all the
+    reindeer to attach themselves to the sleigh. Santa is waiting for all
+    reindeer to signal that they are attached. After, all reindeer wait
+    until they are done flying. When the toys are delievered, santa will 
+    signal to all the reindeer that they are done flying. This tells the 
+    reindeer to unattach themselves from the sleigh. Each reindeer
+    signal that they have unattached themselves. They can then go on
+    vacation. Because the reindeer must wait for santa to say they are
+    done flying before unattaching themselves it prevents the reindeer
+    from sneaking off.
+
+8.
+    Because santa is flying with the reindeer, he is not sleeping. When the
+    last elf tries to wake up santa, he will not be avaible. Meaning that
+    the three elves will wait on ElfHasQuesiton. By being stuck here, it means
+    that additional elves cannot enter to ask santa a question. Once santa is
+    back, he will see that the elves need help and answer their questions.

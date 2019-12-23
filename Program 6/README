@@ -1,0 +1,103 @@
+1. 
+    A number of threades are created the size of the output matrix. These
+    threads get connected to each other by channels. They all have a reference
+    to all of their neighbors. A rowThread for each row is created, likewise
+    columnThreads are created. The coulumnThreads send the data in thre resp.
+    column to the first thread in the resp column of the output matrix.
+    Similarly for each rowThread. When a thread of the output matrix receieves
+    data from both above and left, it multiplies the data and adds it to a
+    a local variable. Then it forwards the data reps. If the data is EOD, it 
+    tells the thread that no more data is expected from that channel. And
+    will no longer try to receive more data from that channel. when both
+    (above, left) channels sent EOD, the thread saves the local variable to
+    the output and forwards EOD below and right. When all threads terminate
+    the output is printed.
+
+2.
+    My program works because a thread only terminates when it receieves
+    EOD from above and right. For this to happen, all data must have been sent
+    to the thread.
+
+3.
+    ThreadProcessor:
+        threadId(threadId)
+            - Set to the unique id that is incremented each time it is
+            assigned. This is correct because each thread needs a unique ID 
+            for the channels to send data across.
+        indexI(i)
+        indexJ(j)
+            -indexI and indexJ are set to the indexs of their corisponding
+            thread in the threadProcessor array.
+        UserDefinedThreadId = threadId;
+            - Set to the unique id that is incremented each time it is
+            assigned. This is correct because each thread needs a unique ID 
+            for the channels to send data across.
+
+        leftChannel = NULL;
+        rightChannel = NULL;
+        aboveChannel = NULL;
+        belowChannel = NULL;
+            -Channels are set to NULL, because they start out with no channels
+            and only get set to one if there is a processor in that
+            reps. location. These are used to send the data and recieve the
+            data between threads.
+
+        processerAbove = FALSE;
+        processorBelow = FALSE;
+        processorRight = FALSE;
+        processorLeft = FALSE;
+            -Processors are set to NULL, because they are only set if the resp.
+            process in the resp. location exists. This is used for a check to 
+            create the channels, and where data should be sent.
+
+    ThreadColumnChannel
+        UserDefinedThreadId = threadId;
+            - Set to the unique id that is incremented each time it is
+            assigned. This is correct because each thread needs a unique ID 
+            for the channels to send data across.
+        channel = NULL;
+            -Channels are set to NULL, because they start out with no channels
+            and only get set to one if there is a processor in that
+            reps. location. These are used to send the data to threads.
+        
+   ThreadRowChannel
+        UserDefinedThreadId = threadId;
+            - Set to the unique id that is incremented each time it is
+            assigned. This is correct because each thread needs a unique ID 
+            for the channels to send data across.
+        channel = NULL;
+            -Channels are set to NULL, because they start out with no channels
+            and only get set to one if there is a processor in that
+            reps. location. These are used to send the data to threads.
+ 4.
+    1.
+        Because the rowThread sends row i of matrix A across P_ij. Similarly
+        columnThread send column j of of matrix B to P_ij. The product of each
+        pair of data sent is added to the local variable.
+
+    2.
+        Synchronous channels are used to keep the correct A_i values 
+        synchronized with the corrent B_i values. If they were ASync, Row_i
+        thread could send data twice as fast and the local variable would hold
+        the results (A_i * B_i) + (A_(i+1) * B_i). This would be incorrect.        
+    
+    3.
+        Yes, it spreds down and right.
+        Starting at P00 and ending at Pij would look like:
+
+        P00 --> P01 --> P0* --> P0i
+         |       |       |       |
+         v       v       v       v
+        P10 --> P11 --> P1* --> P1i
+         |       |       |       |
+         v       v       v       v
+        P*0 --> P*1 --> P** --> P*i
+         |       |       |       |
+         v       v       v       v
+        Pj0 --> Pj1 --> Pj* --> Pji
+
+    4.
+        Yes, because u=m it is guranteed that all data will be sent
+        and recieved because of the blocking receive calls. This means
+        that once a thread recieves EOD, it has the correct value and
+         can terminate.

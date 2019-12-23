@@ -1,0 +1,90 @@
+Question 1. 
+                          0
+                         / \
+                            1
+                           / \
+                              2
+                             / \
+                                3
+                                |
+
+    4 processes are created.
+
+     The shell spawns 0 and 0 calls forks and creates child 1, 0's fork gets 
+	 evaluated to != 0 so it breaks and prints the pid and ppid. Child 1's 
+	 fork gets evaluated to 0 and continues the loop where it spawns child 2,
+	 child 1 breaks and prints it pid and ppid while child 2 continues with 
+	 the loop. Child 2 spawns child 3 then breaks and prints it pid and ppid.
+	 Child 3 continues the loop which i<n evaluates to false and child 3
+	 prints its pid and ppid.
+    
+Question 2.
+                             0
+                           1-|
+                           2-|
+                           3-|
+                           4-|
+
+    5 processes are created.
+	
+    The shell spawns 0 and 0 loops for 4 times, each time creating a child
+	that breaks and prints out its pid and ppid. The children do not spawn
+	any children, only the original process.
+
+Question 3.
+    8 processes are created. 
+	
+    I will show what process are created at the different values of i.
+
+    The shell creates process 0.
+    i = 0:
+        Process 0 creates 1.
+    i = 1:
+        Process 0 creates 2.
+        Procees 1 creates 4.
+    i = 2:
+        Process 0 creates 3.
+        Process 1 creates 5.
+        Process 2 creates 6.
+        Process 4 creates 7.
+    i = 3:
+        All processes exit the loop and print their pid and ppid.
+
+                     ___0___
+                    /   |   \  
+                   1    2    3       
+                  / \   |  
+                 4  5   6
+                 |
+                 7
+				 
+Question 4.
+    The shape of the distribution is called a bell curve. I believe the 
+	histogram is a bell curve because the middle bins have the highest
+	chances and the bins on the outside have a lower changes. This is 
+	because of the probability associated with each bin.
+
+    For each peg we know the changes of the ball going left or right is .5.
+	We can then calculate the total probability that a ball will reach 
+	each peg.
+                     
+                    .5
+                .25  *  .25
+                 *       *
+            .125  .125(x2)  .125
+              *       *       *
+          |   |   |   |   |   |   |
+    With the probability of each peg known, we can do the same math for 
+	each bin and get the total probability that a ball will land in the bin.
+                   
+                    .5
+                .25  *  .25
+                 *       *
+            .125  .125(x2)  .125
+              *       *       *
+         |.125| .375  | .375  | .125 |
+
+    As you can see, the middle bins have a higer probability because they have
+	more paths that a ball can follow and still land in the bin. The 
+	probability here is consistent with the data we get when we run it
+	through our program.

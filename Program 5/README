@@ -1,0 +1,92 @@
+1. 
+    The logic of my program goes as follows:
+    The boat starts off in the empty state.
+    Cannabals and Missionaries arrive and increment the number waiting res.
+    They then wait to board the boat.
+    When the 3 Missionaries, 3 Cannabals, or 3M and 2C are waiting they change
+    the state of the boat to ready. 
+    This tells the boat to kick off the loading process, it select the 
+    passengers and signals the condition the Missionaries and Cannabals are
+    waiting on.
+    They will then have control of the monitor, they board the boat and
+    increase a counter of passengers aboard the boat. They then wait for the 
+    boat to arrive. If the last passenger is boarding, it tells sets the boat 
+    state to loaded. The boat will then see its loaded and go to its
+    destination, it will the signal the passengers to get off.
+    The last passenger to get off sets the boat state to empty. 
+    The boat will then check if its empty and there is people waiting or
+    if the boat is ready.
+
+2.
+    My program works by always checking if the boat can be loaded, if it can
+    this means there are people waiting and can board it.
+
+3.
+    These are my variables and inital values.
+
+    Monitor("boat-monitor", HOARE),
+    - Monitor to control the program, Initalized to HOARE
+    numberOfTrips(numberOfTrips),
+    - This holds the max number of trips to take, it is initalized to the 
+      default or the user provided
+    currentTrip(0),
+    - This hold the current trip the boat is on, it is used for printing and
+        telling the boat when to stop taking trips.
+    cannibalsWaiting(0),
+    - This is the counter of Cannabals that are waiting to board the boat.
+     It is initalized to 0 because the queue starts with noone.
+    missionariesWaiting(0),
+    - This is the counter of Missionaries that are waiting to board the boat.
+     It is initalized to 0 because the queue starts with noone.
+    passengersOnBoat(0),
+    - This holds the current number of people on the boat, it is used to pass
+        as a condition to set the state of the boat. There are 0 people on the
+        the boat at the start.
+    boatState(EMPTY),
+    - This holds the state that the boat is in, it starts empty
+    MissionaryQueue(new Condition("MissionaryQueue")),
+    - This is the condition that Missionaries wait on to board the boat.
+    CannibalQueue(new Condition("CannibalQueue")),
+    - This is the condition that Cannabals wait on to board the boat.
+    ExitBoat(new Condition("ExitBoat"))
+    - This is the condition that passengers wait on to exit the boat.
+
+4.
+    Yes, the boat only loads when there are 3 Missionaries, 3 Cannabals
+    or 2 Missionaries and 1 Cannabals waiting. Then is signals excatly those
+    who would be safe to board.
+
+5. 
+    For assembling a boat I check if there are 3 Missionaries waiting, 
+    if their are, I check if there are at least 1 Cannabals waiting, if there
+    is I check if a random number is odd or even. If its even it will board
+    the three Missionaries.
+    If the top fails, then I check if there are 3 cannibals waiting, if there
+    is I check if there are no Missionaries waiting. If there is, I will 
+    check if a random number is odd or even.
+    If both of the above fails, that means we have at least 2 missionaries 
+    and 1 cannibals waiting. I then select them.
+
+    I randomize the choosing to prevent a queue of missionaries from 
+    always being loaded over the cannibals.
+
+6.
+    1.
+        No one can get off the boat because the boat triggers when passengers
+        can get off, all passengers are waiting on boatDone, which is only
+        called when the boat crosses.
+    2.
+        No one can jump on the boat when it is crossing becase passengers can
+        only board when the boat is in the boatReady function, if the boat is
+        crossing it has already left this function and cannot reenter until 
+        the last passenger tells the boat that its empty.
+    3.
+        We cant have any rogue passengers because all the people waiting to
+        board the boat are waiting on a condition. And only those who have
+        been selected can board the boat. If a passenger entered the boat who
+        was not called, then the condition signal called more that one person.
+    4.
+        A person on the boat is blocked by the condition exitBoat, for them to
+        register again, they would have had to exit the boat, which can 
+        only happen when the boat has arrived and signaled them to exit.
+        
